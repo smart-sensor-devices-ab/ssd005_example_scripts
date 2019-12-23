@@ -3,7 +3,9 @@ import time
 
 connecting_to_dongle = 0
 print("Connecting to dongle...")
-#Trying to connect to dongle
+# Trying to connect to dongle until connected. Make sure the port and baudrate is the same as your dongle.
+# You can check in the device manager to see what port then right-click and choose properties then the Port Settings
+# tab to see the other settings
 while connecting_to_dongle == 0:
     try:
         console = serial.Serial(
@@ -33,8 +35,8 @@ while 1 and console.is_open.__bool__():
         # input = raw_input("Enter the UUID... ")
         new_input = input("Enter the UUID (x) string with Major (j), Minor (n) and TX (t) (format:"
                           "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxjjjjnnnntt): ")
-        # send the character to the dongle
         time.sleep(0.1)
+        # sends the commands to the dongle. Important to send the \r as that is the return-key.
         console.write(str.encode("AT+ADVDATAI="))
         console.write(new_input.encode())
         console.write('\r'.encode())

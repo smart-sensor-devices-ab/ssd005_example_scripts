@@ -3,7 +3,9 @@ import time
 
 connecting_to_dongle = 0
 print("Connecting to dongle...")
-#Trying to connect to dongle
+# Trying to connect to dongle until connected. Make sure the port and baudrate is the same as your dongle.
+# You can check in the device manager to see what port then right-click and choose properties then the Port Settings
+# tab to see the other settings
 while connecting_to_dongle == 0:
     try:
         console = serial.Serial(
@@ -30,13 +32,13 @@ while 1 and console.is_open.__bool__():
     # get keyboard input once
     if (new_input == "NEW-INPUT"):
         # Python 2 users
-        # input = raw_input("Enter the UUID... ")
+        # input = raw_input("Select:\n1) If you... ")
         new_input = input("Select:\n1) If you'd like to scan for devices without a timer to stop.\n2)"
                           " If you'd like to scan for devices for a selected period of time.\n"
                           "3) If you'd like to scan a specific device.\n>>")
-        # send the character to the dongle
         if new_input == "1":
             time.sleep(0.1)
+            # sends the commands to the dongle. Important to send the \r as that is the return-key.
             console.write(str.encode("AT+CENTRAL"))
             console.write('\r'.encode())
             time.sleep(0.1)
@@ -44,6 +46,7 @@ while 1 and console.is_open.__bool__():
             console.write('\r'.encode())
         elif new_input == "2":
             time.sleep(0.1)
+            # sends the commands to the dongle. Important to send the \r as that is the return-key.
             console.write(str.encode("AT+CENTRAL"))
             console.write('\r'.encode())
             input_time = input("Please select amount of time the scanning should continue: ")
@@ -55,6 +58,7 @@ while 1 and console.is_open.__bool__():
             console.write('\r'.encode())
         elif new_input == "3":
             time.sleep(0.1)
+            # sends the commands to the dongle. Important to send the \r as that is the return-key.
             console.write(str.encode("AT+CENTRAL"))
             console.write('\r'.encode())
             time.sleep(0.1)
