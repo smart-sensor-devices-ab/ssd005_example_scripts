@@ -1,5 +1,3 @@
-import uuid
-
 import serial
 import time
 
