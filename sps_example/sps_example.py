@@ -27,9 +27,9 @@ print("\n\nConnected to Dongle.\n")
 print("\nWelcome to the Serial Port Service (SPS) example!\n\n")
 
 # Python 2 users
-# input = raw_input("Choose 1) for... ")
+# input = raw_input("Choose \n1) for Peripheral...
 role_input = input("Choose \n1) for Peripheral Role\n2) for Central role\n>> ")
-while not role_input == "1" or role_input == "2":
+while not (role_input == "1" or role_input == "2"):
     role_input = input("Please choose 1 or 2.\nChoose 1 for Peripheral Role or 2 for Central role: ")
 
 connected = "0";
@@ -98,3 +98,5 @@ while 1 and console.is_open.__bool__():
         console.write(terminal_input.encode())
         console.write('\r'.encode())
         time.sleep(0.5)
+        console.write(str.encode("AT+SPSRECEIVE"))
+        console.write('\r'.encode())
