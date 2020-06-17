@@ -96,6 +96,7 @@ while 1 and console.is_open.__bool__():
                     time.sleep(2)
                     # We wait a bit then sends the starting msg to the other dongle.
                     console.write(str.encode(msg))
+                    counter += 1
                 dongle_output2 = " "
     while connected == "1":
         dongle_output3 = console.read(console.in_waiting)
@@ -106,7 +107,8 @@ while 1 and console.is_open.__bool__():
             if dongle_output3.__contains__(str.encode("\r\n[Received]: ")):
                 print(dongle_output3)
                 # Sometimes some extra bytes will be sent along with the message that the decode() function can't handle
-                # so we put it in a try-except block so that it wont crash the script.
+                # so we put it in a try-except block so that it wont crash the script. We also save the last message as
+                # a fallback in case of error.
                 try:
                     # Here we convert the msg to a string and strip it of all newlines and carriage returns.
                     msg = str(dongle_output3.decode("ascii"))
@@ -114,11 +116,10 @@ while 1 and console.is_open.__bool__():
                     msg = msg.replace("\r\n", "")
                     latest_msg = msg
                 except:
+                    # In case of an error we use the last received message instead and increment the error counter.
                     msg = latest_msg
                     error_counter += 1
-                print("This is what we will send:")
-                print(str.encode(msg))
-                time.sleep(1)
+                print("This is what we will send: " + msg)
                 # Encodes the string msg than sends it back to the other dongle.
                 console.write(str.encode(msg))
                 counter += 1
