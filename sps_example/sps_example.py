@@ -1,17 +1,24 @@
 import serial
 import time
 
-connecting_to_dongle = 0
+target_dongle_mac_address = "[0]40:48:FD:E5:2D:05" # Change this to the peripheral's mac address.
+your_com_port = 'COM14' # Change this to the com port your dongle is connected to.
+
+# Global
+connecting_to_dongle = True
 counter = 0
 msg = ""
+latest_msg = ""
+error_counter = 0
+
 print("Connecting to dongle...")
 # Trying to connect to dongle until connected. Make sure the port and baudrate is the same as your dongle.
 # You can check in the device manager to see what port then right-click and choose properties then the Port Settings
 # tab to see the other settings
-while connecting_to_dongle == 0:
+while connecting_to_dongle:
     try:
         console = serial.Serial(
-            port='COM14',
+            port=your_com_port,
             baudrate=57600,
             parity="N",
             stopbits=1,
@@ -19,7 +26,7 @@ while connecting_to_dongle == 0:
             timeout=0
         )
         if console.is_open.__bool__():
-            connecting_to_dongle = 1
+            connecting_to_dongle = False
     except:
         print("Dongle not connected. Please reconnect Dongle.")
         time.sleep(5)
@@ -31,9 +38,9 @@ print("\nRemember to setup the Peripheral dongle first so Central has something 
 
 # Python 2 users
 # input = raw_input("Choose \n1) for Peripheral...
-role_input = input("Choose \n1) for Peripheral Role\n2) for Central role\n>> ")
+role_input = input("Choose: \n1) for Peripheral Role\n2) for Central role\n>> ")
 while not (role_input == "1" or role_input == "2"):
-    role_input = input("Please choose 1 or 2.\nChoose 1 for Peripheral Role or 2 for Central role: ")
+    role_input = input("Please choose 1 or 2.\nChoose: \n1) for Peripheral Role \n2) for Central role\n>>  ")
 
 connected = "0"
 while 1 and console.is_open.__bool__():
@@ -65,12 +72,13 @@ while 1 and console.is_open.__bool__():
         # Sends the commands to the dongle. Important to send the \r as that is the return-key.
         console.write(str.encode("AT+CENTRAL"))
         console.write('\r'.encode())
+        time.sleep(0.1)
         print("Putting dongle in Central role and trying to connect to other dongle.")
         while connected == "0":
-            time.sleep(0.1)
             # Sends the commands to the dongle. Important to send the \r as that is the return-key.
             time.sleep(0.5)
-            console.write(str.encode("AT+GAPCONNECT=[0]40:48:FD:E5:2D:05"))
+            console.write(str.encode("AT+GAPCONNECT="))
+            console.write(str.encode(target_dongle_mac_address))
             console.write('\r'.encode())
             dongle_output2 = console.read(console.in_waiting)
             time.sleep(2)
@@ -85,7 +93,8 @@ while 1 and console.is_open.__bool__():
                     console.write('\r'.encode())
                     connected = "1"
                     print("Connected!")
-                    # Sends the starting msg to the other dongle.
+                    time.sleep(2)
+                    # We wait a bit then sends the starting msg to the other dongle.
                     console.write(str.encode(msg))
                 dongle_output2 = " "
     while connected == "1":
@@ -103,8 +112,10 @@ while 1 and console.is_open.__bool__():
                     msg = str(dongle_output3.decode("ascii"))
                     msg = msg.replace('[Received]: ', '')
                     msg = msg.replace("\r\n", "")
+                    latest_msg = msg
                 except:
-                    msg = "Error"
+                    msg = latest_msg
+                    error_counter += 1
                 print("This is what we will send:")
                 print(str.encode(msg))
                 time.sleep(1)
@@ -112,11 +123,13 @@ while 1 and console.is_open.__bool__():
                 console.write(str.encode(msg))
                 counter += 1
                 # Just a little counter to show how many messages we've sent.
-                print(str(counter) + " message(s) sent.")
+                print(str(counter) + " message(s) sent. " + str(error_counter) + " error(s).")
                 # In case we get disconnected from the other dongle we go back to the previous state of waiting for a
                 # connection (Peripheral) / trying to reconnect (Central).
             if dongle_output3.__contains__(str.encode("\r\nDISCONNECTED.")):
                 print("Disconnected!")
+                # Send an Escape to abort stream.
+                console.write(0x1B)
                 connected = "0"
             dongle_output3 = ""
         msg = ""
